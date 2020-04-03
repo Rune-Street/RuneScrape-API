@@ -6,7 +6,9 @@ import os
 
 def create_app():
     app = Flask(__name__)
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('RUNESCRAPE_DB', 'postgresql://postgres:insecure-password@localhost/postgres')
+    db_connection = 'postgresql://{user}:{password}@{host}/postgres'
+    app.config['SQLALCHEMY_DATABASE_URI'] = db_connection.format(
+        user=os.environ.get('DB_USER', 'postgres'), password=os.environ.get('DB_PASSWORD', 'insecure-password'), host=os.environ.get('DB_HOST', 'localhost'))
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
     # Register extensions
