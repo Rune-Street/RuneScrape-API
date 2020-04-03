@@ -1,6 +1,6 @@
-FROM python:3.8.2-alpine3.11
+FROM python:3.8.2-slim-buster
 
-RUN adduser -D -g '' runescrape
+RUN adduser --disabled-password --gecos '' runescrape
 WORKDIR /home/runescrape
 USER runescrape
 
