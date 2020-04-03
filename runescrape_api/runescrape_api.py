@@ -1,6 +1,6 @@
 from flask import Flask
 from .extensions import api
-# from .resources import Todo, TodoList
+from .models.item import Item
 
 
 def create_app():
