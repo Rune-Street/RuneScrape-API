@@ -33,6 +33,6 @@ class ItemHistory(Resource):
     def __init__(self):
         pass
 
-    def get(self, item_id):
-        item_response = Item.query.filter_by(item_id=item_id).all()
+    def get(self, id):
+        item_response = Item.query.filter_by(id=id).all()
         return itemhistory_schema.dump(item_response)
