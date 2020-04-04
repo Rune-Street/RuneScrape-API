@@ -13,7 +13,8 @@ def create_app():
     app.config['SQLALCHEMY_DATABASE_URI'] = db_connection.format(
         user=os.environ.get('DB_USER', 'postgres'), password=os.environ.get('DB_PASSWORD', 'insecure-password'), host=os.environ.get('DB_HOST', 'localhost'))
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    logging.basicConfig(stream=sys.stdout, level=os.environ.get("LOG_LEVEL", 20))
+    logging.basicConfig(stream=sys.stdout, level=os.environ.get("LOG_LEVEL", 20), format='%(asctime)s %(levelname)-8s %(message)s',
+                        datefmt='%Y-%m-%d %H:%M:%S')
 
     # Register extensions
     # Order matters: Initialize SQLAlchemy before Marshmallow
