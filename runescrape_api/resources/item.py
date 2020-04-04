@@ -26,6 +26,7 @@ class ItemsHistory(Resource):
             db.session.rollback()
             abort(400, message='Duplicate key found!')
         db.session.commit()
+        return {'ids': len(request.json)}
 
 
 class ItemHistory(Resource):
