@@ -2,8 +2,9 @@ from flask import request
 from flask_restful import Resource, abort
 from sqlalchemy import exc
 from ..extensions import db
-from ..models.item import Item, itemshistory_schema, itemhistory_schema
+from ..models.item import Item, itemshistory_schema, itemhistory_schema, items_schema
 import logging
+import datetime
 
 
 class ItemsHistory(Resource):
@@ -42,8 +43,6 @@ class Items(Resource):
     def __init__(self):
         pass
 
-    def get(self, id):
-        items_response = ""
-        with open('data.txt', 'r') as cached:
-            items_response = cached.read()
-        return items_response
+    def get(self):
+        items_response = Item.query.filter(Item.time >= datetime.datetime.now() - datetime.timedelta(seconds=180)).order_by(Item.time.asc()).all()
+        return items_schema.dump(items_response)
