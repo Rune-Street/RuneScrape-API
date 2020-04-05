@@ -11,8 +11,8 @@ class ItemsHistory(Resource):
         pass
 
     def get(self):
-        items_response = Item.query.all()
-        return itemshistory_schema.dump(items_response)
+        items_history_response = Item.query.all()
+        return itemshistory_schema.dump(items_history_response)
 
     def post(self):
         if request.json is None:
@@ -34,5 +34,16 @@ class ItemHistory(Resource):
         pass
 
     def get(self, id):
-        item_response = Item.query.filter_by(id=id).all()
-        return itemhistory_schema.dump(item_response)
+        item_history_response = Item.query.filter_by(id=id).all()
+        return itemhistory_schema.dump(item_history_response)
+
+
+class Items(Resource):
+    def __init__(self):
+        pass
+
+    def get(self, id):
+        items_response = ""
+        with open('data.txt', 'r') as cached:
+            items_response = cached.read()
+        return items_response
