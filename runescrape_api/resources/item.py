@@ -46,5 +46,5 @@ class Items(Resource):
 
     def get(self):
         items_response = Item.query.filter(Item.time >= datetime.datetime.now(
-        ) - datetime.timedelta(seconds=300)).order_by(Item.time.asc()).all()
+        ) - datetime.timedelta(seconds=300)).order_by(Item.id.asc()).all()
         return items_schema.dump(items_response)
