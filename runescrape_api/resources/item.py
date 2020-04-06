@@ -35,7 +35,8 @@ class ItemHistory(Resource):
         pass
 
     def get(self, id):
-        item_history_response = Item.query.filter(Item.time >= datetime.datetime.now() - datetime.timedelta(seconds=180)).filter_by(id=id).order_by(Item.time.asc()).all()
+        item_history_response = Item.query.filter(Item.time >= datetime.datetime.now(
+        ) - datetime.timedelta(days=1)).filter_by(id=id).order_by(Item.time.asc()).all()
         return itemhistory_schema.dump(item_history_response)
 
 
@@ -44,5 +45,6 @@ class Items(Resource):
         pass
 
     def get(self):
-        items_response = Item.query.filter(Item.time >= datetime.datetime.now() - datetime.timedelta(seconds=180)).order_by(Item.time.asc()).all()
+        items_response = Item.query.filter(Item.time >= datetime.datetime.now(
+        ) - datetime.timedelta(seconds=300)).order_by(Item.time.asc()).all()
         return items_schema.dump(items_response)
