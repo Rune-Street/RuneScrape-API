@@ -40,6 +40,16 @@ class ItemHistory(Resource):
         return itemhistory_schema.dump(item_history_response)
 
 
+class NamedItemHistory(Resource):
+    def __init__(self):
+        pass
+
+    def get(self, name):
+        item_history_response = Item.query.filter(Item.time >= datetime.datetime.now(
+        ) - datetime.timedelta(days=1)).filter_by(name=name).order_by(Item.time.asc()).all()
+        return itemhistory_schema.dump(item_history_response)
+
+
 class Items(Resource):
     def __init__(self):
         pass
