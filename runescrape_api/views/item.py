@@ -1,8 +1,7 @@
 from ..extensions import api
-from ..resources.item import ItemsHistory, ItemHistory, NamedItemHistory, Items
+from ..resources.item import ItemsHistory, ItemHistory, Items
 
 api.add_resource(ItemsHistory, "/items/history")
-api.add_resource(ItemHistory, "/item/<int:id>/history")
-api.add_resource(NamedItemHistory, "/item/<string:name>/history")
+api.add_resource(ItemHistory, "/item/<int:id>/history", "/item/<int:id>/history/<string:history_length>", "/item/<string:name>/history", "/item/<string:name>/history/<string:history_length>")
 
 api.add_resource(Items, "/items")

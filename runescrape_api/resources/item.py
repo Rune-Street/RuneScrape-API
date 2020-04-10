@@ -34,20 +34,32 @@ class ItemHistory(Resource):
     def __init__(self):
         pass
 
-    def get(self, id):
-        item_history_response = Item.query.filter(Item.time >= datetime.datetime.now(
-        ) - datetime.timedelta(days=1)).filter_by(id=id).order_by(Item.time.asc()).all()
-        return itemhistory_schema.dump(item_history_response)
+    def get(self, id=None, name=None, history_length=None):
 
+        def get_history(time_unit, quantity=1, id=None, name=None):
+            if id is not None and name is None:
+                item_history_response = Item.query.filter(Item.time >= datetime.datetime.now(
+                ) - datetime.timedelta(**{time_unit: quantity})).filter_by(id=id).order_by(Item.time.asc()).all()
+                return itemhistory_schema.dump(item_history_response)
+            elif id is None and name is not None:
+                item_history_response = Item.query.filter(Item.time >= datetime.datetime.now(
+                ) - datetime.timedelta(**{time_unit: quantity})).filter_by(name=name).order_by(Item.time.asc()).all()
+                return itemhistory_schema.dump(item_history_response)
+            else:
+                abort(500)
 
-class NamedItemHistory(Resource):
-    def __init__(self):
-        pass
+        if history_length is None:
+            return get_history("days", id, name)
 
-    def get(self, name):
-        item_history_response = Item.query.filter(Item.time >= datetime.datetime.now(
-        ) - datetime.timedelta(days=1)).filter_by(name=name).order_by(Item.time.asc()).all()
-        return itemhistory_schema.dump(item_history_response)
+        if history_length[-1] != "s":
+            history_length = history_length + "s"
+
+        if history_length not in ("hours", "days", "weeks", "months"):
+            abort(400)
+        elif history_length == "months":
+            return get_history("days", 30, id, name)
+        else:
+            return get_history(history_length, 1, id, name)
 
 
 class Items(Resource):
