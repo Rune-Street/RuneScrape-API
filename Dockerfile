@@ -15,4 +15,4 @@ COPY --chown=runescrape:runescrape .flaskenv .
 COPY --chown=runescrape:runescrape runescrape_api runescrape_api
 COPY --chown=runescrape:runescrape migrations migrations
 
-CMD gunicorn -b 0.0.0.0:8080 --worker-class eventlet runescrape_api.wsgi:app
+CMD gunicorn -b 0.0.0.0:8080 --worker-class eventlet --worker-connections=1000 --workers=5  runescrape_api.wsgi:app
