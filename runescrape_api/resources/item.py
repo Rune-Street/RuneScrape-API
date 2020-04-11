@@ -48,8 +48,8 @@ class ItemHistory(Resource):
             else:
                 abort(500)
 
-        if history_length is None:
-            return get_history("days", id, name)
+        if history_length is None or history_length == "view" or history_length == "view/":
+            return get_history("days", 1, id, name)
 
         if history_length[-1] != "s":
             history_length = history_length + "s"
