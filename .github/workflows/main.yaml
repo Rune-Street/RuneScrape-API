@@ -12,6 +12,8 @@ on:
 jobs:
   # This workflow contains a single job called "build"
   build:
+    # Skips CI on commit message 'push', '***NO_CI***', '[ci skip]', or [skip ci]
+    if: github.event_name == 'push' && contains(toJson(github.event.commits), '***NO_CI***') == false && contains(toJson(github.event.commits), '[ci skip]') == false && contains(toJson(github.event.commits), '[skip ci]') == false
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
