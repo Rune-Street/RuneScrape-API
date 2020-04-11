@@ -1,7 +1,7 @@
 from flask import request
 from flask_restful import Resource, abort
 from sqlalchemy import exc
-from ..extensions import db
+from ..extensions import db, t
 from ..models.item import Item, itemshistory_schema, itemhistory_schema, items_schema
 import logging
 import datetime
@@ -35,17 +35,27 @@ class ItemHistory(Resource):
         pass
 
     def get(self, id=None, name=None, history_length=None):
-
+        @t.timer(name='1-Response')
         def get_history(time_unit, quantity=1, id=None, name=None):
+            t.start('DB')
             if id is not None and name is None:
                 item_history_response = Item.query.filter(Item.time >= datetime.datetime.now(
                 ) - datetime.timedelta(**{time_unit: quantity})).filter_by(id=id).order_by(Item.time.asc()).all()
-                return itemhistory_schema.dump(item_history_response)
+                t.stop('DB')
+                t.start('Serialize')
+                resp = itemhistory_schema.dump(item_history_response)
+                t.stop('Serialize')
+                return resp
             elif id is None and name is not None:
                 item_history_response = Item.query.filter(Item.time >= datetime.datetime.now(
                 ) - datetime.timedelta(**{time_unit: quantity})).filter_by(name=name).order_by(Item.time.asc()).all()
-                return itemhistory_schema.dump(item_history_response)
+                t.stop('DB')
+                t.start('Serialize')
+                resp = itemhistory_schema.dump(item_history_response)
+                t.stop('Serialize')
+                return resp
             else:
+                t.stop('DB')
                 abort(500)
 
         if history_length is None or history_length == "view" or history_length == "view/":
@@ -67,6 +77,8 @@ class Items(Resource):
         pass
 
     def get(self):
+        t.start('DB')
         items_response = Item.query.filter(Item.time >= datetime.datetime.now(
         ) - datetime.timedelta(seconds=300)).order_by(Item.id.asc()).all()
+        t.stop('DB')
         return items_schema.dump(items_response)

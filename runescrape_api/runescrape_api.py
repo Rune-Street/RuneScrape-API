@@ -18,9 +18,11 @@ def create_app():
 
     # Register extensions
     # Order matters: Initialize SQLAlchemy before Marshmallow
-    from .extensions import db, migrate, mm
+    from .extensions import db, migrate, mm, t
     api.init_app(app)
     db.init_app(app)
     migrate.init_app(app, db)
     mm.init_app(app)
+    t.init_app(app, force_debug=True)
+
     return app
