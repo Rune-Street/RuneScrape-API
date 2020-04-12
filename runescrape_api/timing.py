@@ -17,21 +17,21 @@ class Timing():
         if app is not None:
             if app.debug or force_debug:
                 Timing.debug = True
-                log.info(
+                log.debug(
                     "Setting up after-request handler to add server timing header")
                 app.after_request(Timing._add_header)
             else:
-                log.info("Debug mode is off, timing module disabled")
+                log.debug("Debug mode is off, timing module disabled")
 
     def init_app(self, app, force_debug=False):
         if app.debug or force_debug:
             Timing.debug = True
-            log.info(
+            log.debug(
                 "Setting up after-request handler to add server timing header")
             app.after_request(Timing._add_header)
 
         if not Timing.debug:
-            log.info("Debug mode is off, timing module disabled")
+            log.debug("Debug mode is off, timing module disabled")
 
     @staticmethod
     def start(key):
