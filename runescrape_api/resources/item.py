@@ -79,6 +79,6 @@ class Items(Resource):
     def get(self):
         t.start('DB')
         items_response = Item.query.filter(Item.time >= datetime.datetime.now(
-        ) - datetime.timedelta(seconds=300)).order_by(Item.id.asc()).all()
+        ) - datetime.timedelta(seconds=600)).distinct().order_by(Item.id.asc()).all()
         t.stop('DB')
         return items_schema.dump(items_response)
