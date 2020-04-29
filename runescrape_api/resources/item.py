@@ -78,7 +78,7 @@ class Items(Resource):
 
     def get(self):
         t.start('DB')
-        items_response = Item.query.filter(Item.time >= datetime.datetime.now(
+        items_response = Item.query.with_entities(Item.id, Item.name).distinct().filter(Item.time >= datetime.datetime.now(
         ) - datetime.timedelta(seconds=600)).distinct().order_by(Item.id.asc()).all()
         t.stop('DB')
         return items_schema.dump(items_response)
