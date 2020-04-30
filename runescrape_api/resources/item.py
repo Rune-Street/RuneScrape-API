@@ -1,10 +1,14 @@
+import datetime
+import logging
+
 from flask import request
 from flask_restful import Resource, abort
 from sqlalchemy import exc
+from sqlalchemy.dialects.postgresql import insert
+
 from ..extensions import db, t
-from ..models.item import Item, itemshistory_schema, itemhistory_schema, items_schema
-import logging
-import datetime
+from ..models.item import (Item, Item_transaction, itemhistory_schema,
+                           items_schema, itemshistory_schema)
 
 
 class ItemsHistory(Resource):
@@ -12,7 +16,7 @@ class ItemsHistory(Resource):
         pass
 
     def get(self):
-        items_history_response = Item.query.all()
+        items_history_response = Item_transaction.query.all()
         return itemshistory_schema.dump(items_history_response)
 
     def post(self):
@@ -20,8 +24,14 @@ class ItemsHistory(Resource):
             abort(400)
         logging.debug(request.json)
         logging.info('{} item(s) posted'.format(len(request.json)))
+
+        # Insert into cache table
+        cache_values = sorted([{'id': dict['id'], 'name': dict['name'], 'members': dict['members']} for dict in request.json], key=lambda x: x['id'])
+        db.session.execute(insert(Item).values(cache_values).on_conflict_do_nothing())
+        db.session.commit()
+
         try:
-            db.session.bulk_insert_mappings(Item, request.json)
+            db.session.bulk_insert_mappings(Item_transaction, request.json)
         except exc.IntegrityError:
             logging.error('Duplicate key found!')
             db.session.rollback()
@@ -39,16 +49,16 @@ class ItemHistory(Resource):
         def get_history(time_unit, quantity=1, id=None, name=None):
             t.start('DB')
             if id is not None and name is None:
-                item_history_response = Item.query.filter(Item.time >= datetime.datetime.now(
-                ) - datetime.timedelta(**{time_unit: quantity})).filter_by(id=id).order_by(Item.time.asc()).all()
+                item_history_response = Item_transaction.query.filter(Item_transaction.time >= datetime.datetime.now(
+                ) - datetime.timedelta(**{time_unit: quantity})).filter_by(id=id).order_by(Item_transaction.time.asc()).all()
                 t.stop('DB')
                 t.start('Serialize')
                 resp = itemhistory_schema.dump(item_history_response)
                 t.stop('Serialize')
                 return resp
             elif id is None and name is not None:
-                item_history_response = Item.query.filter(Item.time >= datetime.datetime.now(
-                ) - datetime.timedelta(**{time_unit: quantity})).filter_by(name=name).order_by(Item.time.asc()).all()
+                item_history_response = Item_transaction.query.filter(Item_transaction.time >= datetime.datetime.now(
+                ) - datetime.timedelta(**{time_unit: quantity})).filter_by(name=name).order_by(Item_transaction.time.asc()).all()
                 t.stop('DB')
                 t.start('Serialize')
                 resp = itemhistory_schema.dump(item_history_response)
@@ -78,7 +88,6 @@ class Items(Resource):
 
     def get(self):
         t.start('DB')
-        items_response = Item.query.with_entities(Item.id, Item.name).distinct().filter(Item.time >= datetime.datetime.now(
-        ) - datetime.timedelta(seconds=600)).distinct().order_by(Item.id.asc()).all()
+        items_response = Item.query.all()
         t.stop('DB')
         return items_schema.dump(items_response)
