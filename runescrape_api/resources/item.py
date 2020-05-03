@@ -1,10 +1,12 @@
 import datetime
 import logging
 
-from flask import request
+from flask import request, jsonify
 from flask_restful import Resource, abort
 from sqlalchemy import exc
 from sqlalchemy.dialects.postgresql import insert
+from bs4 import BeautifulSoup
+from urllib.request import urlopen, Request
 
 from ..extensions import db, t
 from ..models.item import (Item, Item_transaction, itemhistory_schema,
@@ -91,3 +93,34 @@ class Items(Resource):
         items_response = Item.query.all()
         t.stop('DB')
         return items_schema.dump(items_response)
+
+
+class PopulateItemBuyLimit(Resource):
+    def __init__(self):
+        pass
+
+    def get(self):
+        headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.3'}
+        req_url = 'https://oldschool.runescape.wiki/w/Grand_Exchange/Buying_limits'
+        req = Request(url=req_url, headers=headers)
+        page = urlopen(req)
+        soup = BeautifulSoup(page, 'html.parser')
+
+        body = soup.find(id="bodyContent")
+        buy_limit_table = body.table.find("tbody")
+        rows = buy_limit_table.find_all("tr")[1:]
+        buy_limit_dict = {} 
+        for row in rows:
+            cells = row.find_all("td")
+            buy_limit_dict[cells[0].a['title']] = cells[1].get_text()
+
+        items = Item.query.all()
+
+        for item in items:
+            if item.name in buy_limit_dict:
+                if int(item.buy_limit) != int(buy_limit_dict[item.name]):
+                    item.buy_limit = buy_limit_dict[item.name]
+                    db.session.commit()
+                    print(item.name, item.buy_limit, buy_limit_dict[item.name])   
+
+        return jsonify(items=[item.serialize() for item in items])

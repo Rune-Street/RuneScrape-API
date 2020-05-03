@@ -12,6 +12,13 @@ class Item(db.Model):
     members = db.Column(db.Boolean, nullable=False)
     buy_limit = db.Column(db.Integer, nullable=False, server_default="-1")
 
+    def serialize(self):
+        return {
+            'name': self.name,
+            'members': self.members,
+            'buy_limit': self.buy_limit
+        }
+
 
 class Item_transaction(db.Model):
     __tablename__ = 'price_data'
