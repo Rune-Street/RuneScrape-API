@@ -5,10 +5,9 @@ Revises:
 Create Date: 2020-04-04 14:30:51.979887
 
 """
-from alembic import op
 import sqlalchemy as sa
+from alembic import op
 from sqlalchemy.orm import sessionmaker
-
 
 Session = sessionmaker()
 

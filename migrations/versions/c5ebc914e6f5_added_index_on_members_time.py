@@ -19,7 +19,8 @@ depends_on = None
 
 
 def upgrade():
-    op.create_index('price_data_members_time_idx', 'price_data', [sa.text('members DESC'), 'time'], unique=False)
+    op.create_index('price_data_members_time_idx', 'price_data', [
+                    sa.text('members DESC'), 'time'], unique=False)
 
 
 def downgrade():
