@@ -5,14 +5,14 @@ import logging
 import requests
 
 from bs4 import BeautifulSoup
-from flask import jsonify, request
+from flask import request
 from flask_restful import Resource, abort
 from sqlalchemy import exc
 from sqlalchemy.dialects.postgresql import insert
 
 from ..extensions import db, t
 from ..models.item import (Item, Item_transaction, itemhistory_schema,
-                           items_schema, itemshistory_schema)
+                           items_schema)
 
 
 # Resource representing all items themselves (metadata)

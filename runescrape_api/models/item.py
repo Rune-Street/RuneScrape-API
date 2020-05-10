@@ -7,17 +7,23 @@ class Item(db.Model):
     __tablename__ = 'item'
 
     id = db.Column(db.Integer, nullable=False,
-                   primary_key=True, autoincrement=False, unique=True)
+                   primary_key=True, autoincrement=False)
     name = db.Column(db.String(), nullable=False, unique=True)
     members = db.Column(db.Boolean, nullable=False)
     buy_limit = db.Column(db.Integer, nullable=False, server_default="-1")
 
-    def serialize(self):
-        return {
-            'name': self.name,
-            'members': self.members,
-            'buy_limit': self.buy_limit
-        }
+    __table_args__ = (
+        db.Index('item_id_idx', id),
+        db.Index('item_name_idx', name),
+        db.Index('item_members_buylimit_idx', members.desc(), buy_limit)
+    )
+
+    # def serialize(self):
+    #     return {
+    #         'name': self.name,
+    #         'members': self.members,
+    #         'buy_limit': self.buy_limit
+    #     }
 
 
 class Item_transaction(db.Model):
@@ -26,7 +32,7 @@ class Item_transaction(db.Model):
     # pk = db.Column(db.Integer, primary_key=True,
     #                autoincrement=True, unique=True, nullable=False)
     id = db.Column(db.Integer, nullable=False,
-                   primary_key=True, autoincrement=False, unique=True)
+                   primary_key=True, autoincrement=False)
     name = db.Column(db.String(), nullable=False)
     members = db.Column(db.Boolean, nullable=False)
     buy_average = db.Column(db.Integer, nullable=False)
