@@ -57,4 +57,5 @@ class ItemHistorySchema(mm.SQLAlchemyAutoSchema):
 itemhistory_schema = ItemHistorySchema(many=True)
 itemshistory_schema = ItemHistorySchema(many=True)
 
-items_schema = ItemSchema(only=("id", "name"), many=True)
+# items_schema = ItemSchema(only=("id", "name"), many=True)
+items_schema = ItemSchema(many=True)
