@@ -59,11 +59,11 @@ class PopulateItemBuyLimit(Resource):
         logging.info("Modifying items")
         t.start("Modify")
         items = items_schema.dump(Item.query.all())
-        items.sort(key=lambda x: x["id"])
         for item in items:
             if item["name"] in buy_limit_dict:
                 item["buy_limit"] = buy_limit_dict[item["name"]]
 
+        items.sort(key=lambda x: x["id"])
         t.stop("Modify")
 
         logging.info("Pushing to db")
@@ -114,7 +114,7 @@ class ItemHistory(Resource):
     def __init__(self):
         pass
 
-    def get(self, id=None, name=None, history_length=None):
+    def get(self, id=None, name=None, history_length=None, history_quantity=1):
         @t.timer(name="1-Response")
         def get_history(time_unit, quantity=1, id=None, name=None):
             t.start("DB")
@@ -147,6 +147,6 @@ class ItemHistory(Resource):
         if history_length not in ("hours", "days", "weeks", "months"):
             abort(400)
         elif history_length == "months":
-            return get_history("days", 30, id, name)
+            return get_history("days", 30 * history_quantity, id, name)
         else:
-            return get_history(history_length, 1, id, name)
+            return get_history(history_length, history_quantity, id, name)
