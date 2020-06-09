@@ -1,5 +1,6 @@
 import datetime
 import logging
+import timeit
 
 # from urllib.request import Request, urlopen
 import requests
@@ -91,20 +92,29 @@ class ItemsHistory(Resource):
         logging.debug(request.json)
         logging.info("{} item(s) posted".format(len(request.json)))
 
+        t.start("Cache")
+        cache_filtered = [{"id": item["id"], "name": item["name"], "members": item["members"]}
+                          for item in request.json if {"id", "name", "members"} & item.keys()]
+        cache_filtered.sort(key=lambda x: x["id"])
         # Insert into cache table
-        cache_values = sorted([{"id": dict["id"], "name": dict["name"], "members": dict["members"]}
-                               for dict in request.json], key=lambda x: x["id"])
         db.session.execute(insert(Item).values(
-            cache_values).on_conflict_do_nothing())
+            cache_filtered).on_conflict_do_nothing())
         db.session.commit()
+        t.stop("Cache")
 
+        t.start("Item")
+        item_filtered = [item for item in request.json if {
+            "id", "name", "members", "buy_average", "buy_quantity", "sell_average", "sell_quantity", "overall_average", "overall_quantity"} & item.keys()]
+        item_filtered.sort(key=lambda x: x["id"])
         try:
-            db.session.bulk_insert_mappings(Item_transaction, request.json)
-        except exc.IntegrityError:
-            logging.error("Duplicate key found!")
+            db.session.bulk_insert_mappings(Item_transaction, item_filtered)
+        except exc.IntegrityError as e:
+            logging.error(e)
             db.session.rollback()
             abort(400, message="Duplicate key found!")
         db.session.commit()
+        t.stop("Item")
+
         return {"ids": len(request.json)}
 
 

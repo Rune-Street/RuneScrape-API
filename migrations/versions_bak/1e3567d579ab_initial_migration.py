@@ -42,8 +42,8 @@ def upgrade():
     # chunk_time_interval is in ms
     # Currently set at 21 days per chunk
     session.execute("SELECT create_hypertable(main_table=>'price_data', time_column_name=>'time', chunk_time_interval=>1814400000000, if_not_exists=>TRUE, migrate_data=>TRUE, create_default_indexes=>TRUE);")
-    session.execute("ALTER TABLE price_data SET (timescaledb.compress, timescaledb.compress_segmentby = 'id', timescaledb.compress_orderby = 'time DESC');")
-    session.execute("SELECT add_compress_chunks_policy('price_data', INTERVAL '28 days');")
+    # session.execute("ALTER TABLE price_data SET (timescaledb.compress, timescaledb.compress_segmentby = 'id', timescaledb.compress_orderby = 'time DESC');")
+    # session.execute("SELECT add_compress_chunks_policy('price_data', INTERVAL '28 days');")
 
 
 def downgrade():
